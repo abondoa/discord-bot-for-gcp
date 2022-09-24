@@ -18,3 +18,4 @@ COPY . /usr/src/bot
 
 # Start the bot.
 CMD [ "/usr/src/bot/entrypoint.sh" ]
+ENTRYPOINT [ "/bin/sh" ]
