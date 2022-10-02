@@ -84,10 +84,10 @@ async function server(reply) {
 async function start(interaction) {
   const instancesClient = new compute.InstancesClient();
 
+  await interaction.deferReply();
   const [response] = await instancesClient.start(instanceQuery);
   let operation = response.latestResponse;
   const operationsClient = new compute.ZoneOperationsClient();
-  await interaction.deferReply();
 
   // Wait for the operation to complete.
   while (operation.status !== "DONE") {
@@ -105,10 +105,10 @@ async function start(interaction) {
 async function stop(interaction) {
   const instancesClient = new compute.InstancesClient();
 
+  await interaction.deferReply();
   const [response] = await instancesClient.stop(instanceQuery);
   let operation = response.latestResponse;
   const operationsClient = new compute.ZoneOperationsClient();
-  await interaction.deferReply();
 
   // Wait for the operation to complete.
   while (operation.status !== "DONE") {
