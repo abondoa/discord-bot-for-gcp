@@ -15,6 +15,7 @@ COPY package.json /usr/src/bot
 RUN npm install
 
 COPY . /usr/src/bot
+RUN npm run build
 
 # Start the bot.
 CMD [ "/usr/src/bot/entrypoint.sh" ]
