@@ -65,7 +65,8 @@ export async function stopServer(interaction: CommandInteraction) {
   await server(interaction.editReply.bind(interaction));
 }
 
-async function readTimeSeriesData() {
+async function readTimeSeriesData(minutes: number): Promise<
+  {time:number,value:number |undefined |null}[] | undefined> {
   const filter = 'metric.type="compute.googleapis.com/instance/cpu/utilization"';
 
   const request = {
@@ -74,7 +75,7 @@ async function readTimeSeriesData() {
     interval: {
       startTime: {
         // Limit results to the last 20 minutes
-        seconds: Date.now() / 1000 - 60 * 20,
+        seconds: Date.now() / 1000 - 60 * minutes,
       },
       endTime: {
         seconds: Date.now() / 1000,
@@ -84,12 +85,7 @@ async function readTimeSeriesData() {
 
   // Writes time series data
   const [timeSeries] = await monitoringClient.listTimeSeries(request);
-  timeSeries.forEach(data => {
-    console.log(`${data.metric?.labels?.instance_name}:`);
-    data.points?.forEach(point => {
-      console.log(JSON.stringify(point.value));
-    });
-  });
+  return timeSeries.find(x => x.metric?.labels?.instance_name === instanceQuery.instance)?.points?.map(x => ({time: x.interval?.startTime?.seconds as number, value: x.value?.doubleValue}));
 }
-
-readTimeSeriesData();
+readTimeSeriesData(20).then (x => 
+console.log(JSON.stringify(x)));
