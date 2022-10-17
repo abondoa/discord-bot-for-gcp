@@ -11,6 +11,7 @@ const instancesClient = new compute.InstancesClient();
 
 export async function server(reply: (msg: string) => any) {
   const [instance] = await instancesClient.get(instanceQuery);
+  const ip = instance?.networkInterfaces?.[0]?.accessConfigs?.[0]?.natIP
 
   console.log(
     `Instance ${instanceQuery.instance} data:\n${JSON.stringify(
@@ -20,7 +21,7 @@ export async function server(reply: (msg: string) => any) {
     )}`
   );
   reply(
-    `Server is currently: ${instance.status}, on IP ${instance?.networkInterfaces?.[0]?.accessConfigs?.[0]?.natIP}`
+    `Server is currently: ${instance.status}${ip ? `, on IP ${ip}` : ""}`
   );
 }
 
