@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@google-cloud/compute": "^3.5.0",
+    "@google-cloud/monitoring": "^3.0.2",
     "discord.js": "^14.4.0"
   },
   "devDependencies": {

@@ -1,6 +1,7 @@
 import { CommandInteraction, Interaction } from "discord.js";
 
 import compute from "@google-cloud/compute";
+import monitoring from "@google-cloud/monitoring";
 const gcpConfig = require("./GCP_config.json");
 const instanceQuery = {
   project: gcpConfig.project_id,
@@ -8,6 +9,7 @@ const instanceQuery = {
   instance: "instance-1",
 };
 const instancesClient = new compute.InstancesClient();
+const monitoringClient = new monitoring.MetricServiceClient();
 
 export async function server(reply: (msg: string) => any) {
   const [instance] = await instancesClient.get(instanceQuery);
@@ -62,3 +64,28 @@ export async function stopServer(interaction: CommandInteraction) {
   console.log("Instance stopped.");
   await server(interaction.editReply.bind(interaction));
 }
+
+async function readTimeSeriesData(minutes: number): Promise<
+  {time:number,value:number |undefined |null}[] | undefined> {
+  const filter = 'metric.type="compute.googleapis.com/instance/cpu/utilization"';
+
+  const request = {
+    name: monitoringClient.projectPath(instanceQuery.project),
+    filter: filter,
+    interval: {
+      startTime: {
+        // Limit results to the last 20 minutes
+        seconds: Date.now() / 1000 - 60 * minutes,
+      },
+      endTime: {
+        seconds: Date.now() / 1000,
+      },
+    },
+  };
+
+  // Writes time series data
+  const [timeSeries] = await monitoringClient.listTimeSeries(request);
+  return timeSeries.find(x => x.metric?.labels?.instance_name === instanceQuery.instance)?.points?.map(x => ({time: x.interval?.startTime?.seconds as number, value: x.value?.doubleValue}));
+}
+readTimeSeriesData(20).then (x => 
+console.log(JSON.stringify(x)));
